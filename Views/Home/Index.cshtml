@@ -1,0 +1,33 @@
+@{
+    ViewData["Title"] = "Новости";
+}
+
+<section class="news-hero">
+    <div>
+        <p class="eyebrow">SchoolFlow</p>
+        <h1>Новости школы и важные объявления</h1>
+        <p class="hero-copy">Актуальные события, расписание, объявления и напоминания для учеников, родителей и учителей.</p>
+    </div>
+    <div class="home-login-actions">
+        <a class="btn btn-light" asp-controller="Account" asp-action="StudentLogin">Вход ученика</a>
+        <a class="btn btn-outline-light" asp-controller="Account" asp-action="Login">Вход учителя</a>
+    </div>
+</section>
+
+<section class="news-grid">
+    <article class="news-card">
+        <span>Сегодня</span>
+        <h2>Учебная неделя началась</h2>
+        <p>Следите за объявлениями, сроками сдачи работ и важными событиями школы.</p>
+    </article>
+    <article class="news-card">
+        <span>Объявление</span>
+        <h2>Подготовка к мероприятиям</h2>
+        <p>В классах проходит сбор заявок на участие в школьных проектах и конкурсах.</p>
+    </article>
+    <article class="news-card">
+        <span>Напоминание</span>
+        <h2>Проверяйте расписание</h2>
+        <p>Расписание занятий и сроки учебных работ могут обновляться в течение недели.</p>
+    </article>
+</section>

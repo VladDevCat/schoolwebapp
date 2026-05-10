@@ -1,0 +1,24 @@
+@model SchoolTask
+@{
+    ViewData["Title"] = "Новая задача";
+}
+
+<section class="page-heading">
+    <div>
+        <p class="eyebrow">Новая запись</p>
+        <h1>Добавить школьную задачу</h1>
+    </div>
+    <a class="btn btn-outline-secondary" asp-action="Index">Назад</a>
+</section>
+
+<form class="editor-panel" asp-action="Create" method="post">
+    <partial name="_Form" model="Model" />
+    <div class="form-actions">
+        <button class="btn btn-primary" type="submit">Сохранить</button>
+        <a class="btn btn-light" asp-action="Index">Отмена</a>
+    </div>
+</form>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

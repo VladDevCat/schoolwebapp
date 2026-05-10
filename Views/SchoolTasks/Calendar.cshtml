@@ -1,0 +1,65 @@
+@model IReadOnlyList<SchoolTask>
+@using swa.Models
+@{
+    ViewData["Title"] = "Календарь";
+    var groupedTasks = Model
+        .GroupBy(task => task.DueDate.Date)
+        .OrderBy(group => group.Key)
+        .ToList();
+    string StatusLabel(SchoolTaskStatus status) => status switch
+    {
+        SchoolTaskStatus.Planned => "Запланировано",
+        SchoolTaskStatus.InProgress => "В работе",
+        SchoolTaskStatus.Completed => "Готово",
+        _ => status.ToString()
+    };
+}
+
+<section class="page-heading">
+    <div>
+        <p class="eyebrow">Календарь сроков</p>
+        <h1>Ближайшие сдачи по дням</h1>
+    </div>
+    <div class="heading-actions">
+        <a class="btn btn-outline-primary" asp-action="ExportCsv">CSV</a>
+        <a class="btn btn-primary" asp-action="Create">Новая задача</a>
+    </div>
+</section>
+
+<section class="calendar-timeline">
+    @if (!groupedTasks.Any())
+    {
+        <div class="empty-state">
+            <h2>Календарь пуст</h2>
+            <p>Добавьте задачу со сроком сдачи, и она появится в расписании.</p>
+        </div>
+    }
+    else
+    {
+        @foreach (var day in groupedTasks)
+        {
+            var isToday = day.Key == DateTime.Today;
+            var isPast = day.Key < DateTime.Today;
+            <article class="day-group @(isToday ? "day-today" : string.Empty) @(isPast ? "day-past" : string.Empty)">
+                <div class="day-marker">
+                    <strong>@day.Key.ToString("dd.MM")</strong>
+                    <span>@day.Key.ToString("dddd")</span>
+                </div>
+                <div class="day-tasks">
+                    @foreach (var task in day)
+                    {
+                        <a class="calendar-task priority-@task.Priority.ToString().ToLowerInvariant()" asp-action="Details" asp-route-id="@task.Id">
+                            <span>@task.Subject</span>
+                            <strong>@task.Title</strong>
+                            @if (task.AssignedStudent is not null)
+                            {
+                                <small>@task.AssignedStudent.ClassName · @task.AssignedStudent.FullName</small>
+                            }
+                            <small>@StatusLabel(task.Status)</small>
+                        </a>
+                    }
+                </div>
+            </article>
+        }
+    }
+</section>

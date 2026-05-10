@@ -1,0 +1,68 @@
+@model IReadOnlyList<SchoolTask>
+@using swa.Models
+@{
+    ViewData["Title"] = "Мои задачи";
+    string StatusLabel(SchoolTaskStatus status) => status switch
+    {
+        SchoolTaskStatus.Planned => "Запланировано",
+        SchoolTaskStatus.InProgress => "В работе",
+        SchoolTaskStatus.Completed => "Готово",
+        _ => status.ToString()
+    };
+}
+
+<section class="page-heading">
+    <div>
+        <p class="eyebrow">Кабинет ученика</p>
+        <h1>Мои задачи</h1>
+    </div>
+</section>
+
+<section class="task-list" aria-label="Мои задачи">
+    @if (!Model.Any())
+    {
+        <div class="empty-state">
+            <h2>Задач пока нет</h2>
+            <p>Когда учитель назначит вам задачу, она появится здесь.</p>
+        </div>
+    }
+    else
+    {
+        @foreach (var item in Model)
+        {
+            var isOverdue = item.Status != SchoolTaskStatus.Completed && item.DueDate < DateTime.Today;
+            <article class="task-card priority-@item.Priority.ToString().ToLowerInvariant()">
+                <div class="task-main">
+                    <div class="task-topline">
+                        <span class="subject-chip">@item.Subject</span>
+                        <span class="status-pill status-@item.Status.ToString().ToLowerInvariant()">@StatusLabel(item.Status)</span>
+                    </div>
+                    <h2>@item.Title</h2>
+                    @if (!string.IsNullOrWhiteSpace(item.Description))
+                    {
+                        <p>@item.Description</p>
+                    }
+                    <div class="task-meta">
+                        <span>@item.DueDate.ToString("dd.MM.yyyy")</span>
+                        @if (!string.IsNullOrWhiteSpace(item.Teacher))
+                        {
+                            <span>@item.Teacher</span>
+                        }
+                        @if (isOverdue)
+                        {
+                            <span class="danger-text">Просрочено</span>
+                        }
+                    </div>
+                </div>
+                <div class="task-actions">
+                    @if (item.Status != SchoolTaskStatus.Completed)
+                    {
+                        <form asp-action="Complete" asp-route-id="@item.Id" method="post">
+                            <button class="btn btn-sm btn-success" type="submit">Отметить готовой</button>
+                        </form>
+                    }
+                </div>
+            </article>
+        }
+    }
+</section>

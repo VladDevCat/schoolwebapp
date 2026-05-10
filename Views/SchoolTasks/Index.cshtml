@@ -1,0 +1,128 @@
+@model SchoolTaskDashboardViewModel
+@using swa.Models
+@{
+    ViewData["Title"] = "Школьные задачи";
+    string StatusLabel(SchoolTaskStatus status) => status switch
+    {
+        SchoolTaskStatus.Planned => "Запланировано",
+        SchoolTaskStatus.InProgress => "В работе",
+        SchoolTaskStatus.Completed => "Готово",
+        _ => status.ToString()
+    };
+    string PriorityLabel(TaskPriority priority) => priority switch
+    {
+        TaskPriority.Low => "Низкий",
+        TaskPriority.Medium => "Средний",
+        TaskPriority.High => "Высокий",
+        _ => priority.ToString()
+    };
+}
+
+<section class="hero-panel">
+    <div>
+        <p class="eyebrow">Учебный планировщик</p>
+        <h1>Все школьные задачи в одном аккуратном расписании</h1>
+        <p class="hero-copy">Следите за домашними заданиями, проектами, лабораторными и сроками сдачи без лишнего шума.</p>
+    </div>
+    <a class="btn btn-light hero-button" asp-action="Create">Добавить задачу</a>
+</section>
+
+<section class="stats-grid" aria-label="Сводка задач">
+    <div class="stat-tile">
+        <span>Всего</span>
+        <strong>@Model.TotalCount</strong>
+    </div>
+    <div class="stat-tile">
+        <span>Скоро сдать</span>
+        <strong>@Model.DueSoonCount</strong>
+    </div>
+    <div class="stat-tile">
+        <span>Просрочено</span>
+        <strong>@Model.OverdueCount</strong>
+    </div>
+    <div class="stat-tile">
+        <span>Готово</span>
+        <strong>@Model.CompletedCount</strong>
+    </div>
+</section>
+
+<form class="filter-bar" method="get">
+    <input class="form-control" type="search" name="search" value="@Model.Search" placeholder="Поиск по названию, предмету или описанию" />
+    <select class="form-select" name="subject">
+        <option value="">Все предметы</option>
+        @foreach (var subject in Model.Subjects)
+        {
+            <option value="@subject" selected="@(Model.Subject == subject)">@subject</option>
+        }
+    </select>
+    <select class="form-select" name="status" asp-for="Status" asp-items="Html.GetEnumSelectList<SchoolTaskStatus>()">
+        <option value="">Любой статус</option>
+    </select>
+    <button class="btn btn-dark" type="submit">Фильтровать</button>
+    <a class="btn btn-outline-secondary" asp-action="Index">Сброс</a>
+    <a class="btn btn-outline-primary" asp-action="ExportCsv">CSV</a>
+</form>
+
+<section class="task-list" aria-label="Список задач">
+    @if (!Model.Tasks.Any())
+    {
+        <div class="empty-state">
+            <h2>Задачи не найдены</h2>
+            <p>Попробуйте изменить фильтры или добавьте новую учебную задачу.</p>
+            <a class="btn btn-primary" asp-action="Create">Добавить задачу</a>
+        </div>
+    }
+    else
+    {
+        @foreach (var item in Model.Tasks)
+        {
+            var isOverdue = item.Status != SchoolTaskStatus.Completed && item.DueDate < DateTime.Today;
+            var isDueSoon = item.Status != SchoolTaskStatus.Completed && item.DueDate >= DateTime.Today && item.DueDate <= DateTime.Today.AddDays(3);
+            <article class="task-card priority-@item.Priority.ToString().ToLowerInvariant()">
+                <div class="task-main">
+                    <div class="task-topline">
+                        <span class="subject-chip">@item.Subject</span>
+                        <span class="status-pill status-@item.Status.ToString().ToLowerInvariant()">@StatusLabel(item.Status)</span>
+                    </div>
+                    <h2>@item.Title</h2>
+                    @if (!string.IsNullOrWhiteSpace(item.Description))
+                    {
+                        <p>@item.Description</p>
+                    }
+                    <div class="task-meta">
+                        <span>@item.DueDate.ToString("dd.MM.yyyy")</span>
+                        <span>@PriorityLabel(item.Priority) приоритет</span>
+                        @if (!string.IsNullOrWhiteSpace(item.Teacher))
+                        {
+                            <span>@item.Teacher</span>
+                        }
+                        @if (item.AssignedStudent is not null)
+                        {
+                            <span>@item.AssignedStudent.ClassName · @item.AssignedStudent.FullName</span>
+                        }
+                        @if (isOverdue)
+                        {
+                            <span class="danger-text">Просрочено</span>
+                        }
+                        else if (isDueSoon)
+                        {
+                            <span class="warning-text">Скоро срок</span>
+                        }
+                    </div>
+                </div>
+                <div class="task-actions">
+                    <form asp-action="ToggleStatus" asp-route-id="@item.Id" method="post">
+                        <button class="btn btn-sm @(item.Status == SchoolTaskStatus.Completed ? "btn-outline-secondary" : "btn-success")" type="submit">
+                            @(item.Status == SchoolTaskStatus.Completed ? "Вернуть" : "Готово")
+                        </button>
+                    </form>
+                    <a class="btn btn-sm btn-outline-primary" asp-action="Details" asp-route-id="@item.Id">Открыть</a>
+                    <a class="btn btn-sm btn-outline-dark" asp-action="Edit" asp-route-id="@item.Id">Изменить</a>
+                    <form asp-action="Delete" asp-route-id="@item.Id" method="post">
+                        <button class="btn btn-sm btn-outline-danger" type="submit" onclick="return confirm('Удалить задачу?')">Удалить</button>
+                    </form>
+                </div>
+            </article>
+        }
+    }
+</section>

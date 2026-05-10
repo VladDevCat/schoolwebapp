@@ -1,0 +1,26 @@
+@model SchoolTask
+@{
+    ViewData["Title"] = "Редактирование";
+}
+
+<section class="page-heading">
+    <div>
+        <p class="eyebrow">Редактирование</p>
+        <h1>@Model.Title</h1>
+    </div>
+    <a class="btn btn-outline-secondary" asp-action="Index">Назад</a>
+</section>
+
+<form class="editor-panel" asp-action="Edit" method="post">
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="CreatedAt" />
+    <partial name="_Form" model="Model" />
+    <div class="form-actions">
+        <button class="btn btn-primary" type="submit">Сохранить изменения</button>
+        <a class="btn btn-light" asp-action="Index">Отмена</a>
+    </div>
+</form>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

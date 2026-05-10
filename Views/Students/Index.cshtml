@@ -1,0 +1,69 @@
+@model IReadOnlyList<Student>
+@{
+    ViewData["Title"] = "Список класса";
+    var classes = (IReadOnlyList<string>)(ViewBag.Classes ?? new List<string>());
+    var selectedClass = (string?)ViewBag.SelectedClass;
+}
+
+<section class="page-heading">
+    <div>
+        <p class="eyebrow">Список класса</p>
+        <h1>Ученики</h1>
+    </div>
+    <div class="heading-actions">
+        <a class="btn btn-primary" asp-action="Import">Загрузить Excel</a>
+        <a class="btn btn-outline-secondary" asp-controller="SchoolTasks" asp-action="Create">Выдать задачу</a>
+    </div>
+</section>
+
+@if (TempData["ImportResult"] is string result)
+{
+    <div class="alert alert-success">@result</div>
+}
+
+<form class="filter-bar class-filter" method="get">
+    <select class="form-select" name="className">
+        <option value="">Все классы</option>
+        @foreach (var className in classes)
+        {
+            <option value="@className" selected="@(selectedClass == className)">@className</option>
+        }
+    </select>
+    <button class="btn btn-dark" type="submit">Показать</button>
+    <a class="btn btn-outline-secondary" asp-action="Index">Сброс</a>
+</form>
+
+<section class="students-table-panel">
+    @if (!Model.Any())
+    {
+        <div class="empty-state">
+            <h2>Список пуст</h2>
+            <p>Загрузите Excel-таблицу с колонками: ФИО, Класс, Email, Логин, Пароль.</p>
+            <a class="btn btn-primary" asp-action="Import">Загрузить Excel</a>
+        </div>
+    }
+    else
+    {
+        <table class="students-table">
+            <thead>
+                <tr>
+                    <th>ФИО</th>
+                    <th>Класс</th>
+                    <th>Email</th>
+                    <th>Логин</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var student in Model)
+                {
+                    <tr>
+                        <td>@student.FullName</td>
+                        <td>@student.ClassName</td>
+                        <td>@(string.IsNullOrWhiteSpace(student.Email) ? "Не указан" : student.Email)</td>
+                        <td>@student.Login</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</section>

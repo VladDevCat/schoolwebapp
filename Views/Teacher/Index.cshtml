@@ -1,0 +1,128 @@
+@model TeacherDashboardViewModel
+@using swa.Models
+@{
+    ViewData["Title"] = "Кабинет учителя";
+    string StatusLabel(SchoolTaskStatus status) => status switch
+    {
+        SchoolTaskStatus.Planned => "Запланировано",
+        SchoolTaskStatus.InProgress => "В работе",
+        SchoolTaskStatus.Completed => "Готово",
+        _ => status.ToString()
+    };
+}
+
+<section class="teacher-hero">
+    <div>
+        <p class="eyebrow">Раздел учителя</p>
+        <h1>Контроль нагрузки, сроков и выполнения заданий</h1>
+        <p class="hero-copy">Быстрый обзор активных работ помогает увидеть, какие предметы перегружены и что требует внимания в ближайшие дни.</p>
+    </div>
+    <div class="teacher-actions">
+        <a class="btn btn-light" asp-controller="SchoolTasks" asp-action="Create">Выдать задачу</a>
+        <a class="btn btn-outline-light" asp-controller="SchoolTasks" asp-action="Calendar">Календарь</a>
+    </div>
+</section>
+
+<section class="stats-grid" aria-label="Сводка учителя">
+    <div class="stat-tile">
+        <span>Всего задач</span>
+        <strong>@Model.TotalCount</strong>
+    </div>
+    <div class="stat-tile">
+        <span>Активные</span>
+        <strong>@Model.ActiveCount</strong>
+    </div>
+    <div class="stat-tile">
+        <span>Высокий приоритет</span>
+        <strong>@Model.HighPriorityCount</strong>
+    </div>
+    <div class="stat-tile">
+        <span>Выполнено</span>
+        <strong>@Model.CompletedCount</strong>
+    </div>
+</section>
+
+<section class="teacher-grid">
+    <div class="teacher-panel">
+        <div class="panel-heading">
+            <h2>Срочно проверить</h2>
+            <a asp-controller="SchoolTasks" asp-action="Index">Все задачи</a>
+        </div>
+        @if (!Model.UrgentTasks.Any())
+        {
+            <p class="muted-text">Срочных задач на ближайшие дни нет.</p>
+        }
+        else
+        {
+            <div class="compact-list">
+                @foreach (var task in Model.UrgentTasks)
+                {
+                    <a class="compact-task" asp-controller="SchoolTasks" asp-action="Details" asp-route-id="@task.Id">
+                        <span>@task.DueDate.ToString("dd.MM") · @task.Subject</span>
+                        <strong>@task.Title</strong>
+                        @if (task.AssignedStudent is not null)
+                        {
+                            <span>@task.AssignedStudent.ClassName · @task.AssignedStudent.FullName</span>
+                        }
+                    </a>
+                }
+            </div>
+        }
+    </div>
+
+    <div class="teacher-panel">
+        <div class="panel-heading">
+            <h2>Нагрузка по предметам</h2>
+        </div>
+        @foreach (var item in Model.SubjectWorkload)
+        {
+            var percent = item.TotalCount == 0 ? 0 : (int)Math.Round(item.CompletedCount * 100m / item.TotalCount);
+            <div class="workload-row">
+                <div>
+                    <strong>@item.Name</strong>
+                    <span>@item.ActiveCount активных, @item.CompletedCount готово</span>
+                </div>
+                <div class="progress-meter" aria-label="Готово @percent%">
+                    <span style="width: @percent%"></span>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="teacher-panel">
+        <div class="panel-heading">
+            <h2>Преподаватели</h2>
+        </div>
+        @if (!Model.TeacherWorkload.Any())
+        {
+            <p class="muted-text">В задачах пока не указаны преподаватели.</p>
+        }
+        else
+        {
+            @foreach (var item in Model.TeacherWorkload)
+            {
+                <div class="workload-row">
+                    <div>
+                        <strong>@item.Name</strong>
+                        <span>@item.TotalCount задач, @item.ActiveCount активных</span>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+
+    <div class="teacher-panel">
+        <div class="panel-heading">
+            <h2>Последние записи</h2>
+        </div>
+        <div class="compact-list">
+            @foreach (var task in Model.RecentTasks)
+            {
+                <a class="compact-task" asp-controller="SchoolTasks" asp-action="Details" asp-route-id="@task.Id">
+                    <span>@StatusLabel(task.Status) · @task.Subject</span>
+                    <strong>@task.Title</strong>
+                </a>
+            }
+        </div>
+    </div>
+</section>

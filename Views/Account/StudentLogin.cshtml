@@ -1,0 +1,32 @@
+@model StudentLoginViewModel
+@{
+    ViewData["Title"] = "Вход ученика";
+}
+
+<section class="auth-panel">
+    <div>
+        <p class="eyebrow">Кабинет ученика</p>
+        <h1>Вход ученика</h1>
+        <p class="muted-text">Введите логин и пароль, чтобы открыть свои учебные задачи.</p>
+    </div>
+
+    <form asp-action="StudentLogin" method="post" class="auth-form">
+        <input type="hidden" asp-for="ReturnUrl" />
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="form-field">
+            <label asp-for="Login" class="form-label"></label>
+            <input asp-for="Login" class="form-control" autocomplete="username" />
+            <span asp-validation-for="Login" class="text-danger"></span>
+        </div>
+        <div class="form-field">
+            <label asp-for="Password" class="form-label"></label>
+            <input asp-for="Password" class="form-control" autocomplete="current-password" />
+            <span asp-validation-for="Password" class="text-danger"></span>
+        </div>
+        <button class="btn btn-primary" type="submit">Войти</button>
+    </form>
+</section>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

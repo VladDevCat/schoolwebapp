@@ -1,0 +1,48 @@
+@model SchoolTask
+@using swa.Models
+
+<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+<div class="form-grid">
+    <div class="form-field form-field-wide">
+        <label asp-for="Title" class="form-label"></label>
+        <input asp-for="Title" class="form-control" placeholder="Например: подготовить доклад по биологии" />
+        <span asp-validation-for="Title" class="text-danger"></span>
+    </div>
+    <div class="form-field">
+        <label asp-for="Subject" class="form-label"></label>
+        <input asp-for="Subject" class="form-control" placeholder="Математика" />
+        <span asp-validation-for="Subject" class="text-danger"></span>
+    </div>
+    <div class="form-field">
+        <label asp-for="Teacher" class="form-label"></label>
+        <input asp-for="Teacher" class="form-control" placeholder="Фамилия И. О." />
+        <span asp-validation-for="Teacher" class="text-danger"></span>
+    </div>
+    <div class="form-field">
+        <label asp-for="AssignedStudentId" class="form-label"></label>
+        <select asp-for="AssignedStudentId" class="form-select" asp-items="ViewBag.Students">
+            <option value="">Для всего класса / без ученика</option>
+        </select>
+        <span asp-validation-for="AssignedStudentId" class="text-danger"></span>
+    </div>
+    <div class="form-field">
+        <label asp-for="DueDate" class="form-label"></label>
+        <input asp-for="DueDate" class="form-control" />
+        <span asp-validation-for="DueDate" class="text-danger"></span>
+    </div>
+    <div class="form-field">
+        <label asp-for="Priority" class="form-label"></label>
+        <select asp-for="Priority" class="form-select" asp-items="Html.GetEnumSelectList<TaskPriority>()"></select>
+        <span asp-validation-for="Priority" class="text-danger"></span>
+    </div>
+    <div class="form-field">
+        <label asp-for="Status" class="form-label"></label>
+        <select asp-for="Status" class="form-select" asp-items="Html.GetEnumSelectList<SchoolTaskStatus>()"></select>
+        <span asp-validation-for="Status" class="text-danger"></span>
+    </div>
+    <div class="form-field form-field-wide">
+        <label asp-for="Description" class="form-label"></label>
+        <textarea asp-for="Description" class="form-control" rows="5" placeholder="Что нужно сделать, какие материалы взять, как будет проверяться"></textarea>
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+</div>
